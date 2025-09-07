@@ -3,6 +3,14 @@ import torch
 from torch import nn
 
 class TennisStrokeClassification(nn.Module):
+    '''
+    Tennis Stroke Multiclass Classification Convolutional Neural Network (CNN).
+    Takes `num_classes` as input. Takes RGB inputs, thus 3 in_channels on first convolutional layer. 
+    Each block of `self.features` applies a `nn.Conv2d()` filter, normalizes the batch using `nn.BatchNorm2d()`,
+    applies a rectified linear unit activation layer `nn.ReLU()`, and performs max pooling using `nn.MaxPool2d()`.
+    `self.adaptive_pool` forces the final feature map to have size 8x8. Finally, `self.classifier` flattens the image and
+    applies a linear layer with 512 * 8 * 8 input to `num_classes` outputs.
+    '''
     def __init__(self, num_classes: int = 4):
         super().__init__()
         self.features = nn.Sequential(
@@ -44,6 +52,7 @@ class TennisStrokeClassification(nn.Module):
         )
 
     def forward(self, x):
+        """Defines the `forward()` pass of the CNN model. Device is moved to `cpu` for `self.adaptive_pool` as `mps` does not support it."""
         x = self.features(x)
         if x.device.type == 'mps':
             x = x.to('cpu')
