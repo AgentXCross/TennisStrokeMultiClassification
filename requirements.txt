@@ -4,6 +4,7 @@ torchvision
 torchsummary
 torchinfo
 scikit-learn
+streamlit
 numpy
 matplotlib
 Pillow
