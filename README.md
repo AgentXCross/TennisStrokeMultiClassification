@@ -1,7 +1,7 @@
 # **Tennis Stroke Multi-Class Classification (Convolutional Neural Networks w/ PyTorch)**
 A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a custom convolutional neural network (CNN).  
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts for production.
-Once model was trained and saved using **PyTorch**, model was deployed using (coming soon).
+Once model was trained and saved using **PyTorch**, model was deployed using **Streamlit**.
 
 ---
 
@@ -78,7 +78,7 @@ dataset/
 project_root/
 │
 ├── main.py               # Entry point for training and saving the model
-├── app.py                # Model deployment (Coming Soon)
+├── app.py                # Model deployment using Streamlit
 ├── model.py              # CNN model definition
 ├── dataset.py            # Dataloader and data transformation functions
 ├── train_test_loop.py    # Training and evaluation loops
@@ -163,6 +163,14 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 model = TennisStrokeClassification().to(device)
 model.load_state_dict(torch.load("tennis_stroke_model.pth", map_location = device))
 model.eval()
+```
+
+---
+
+## **Running the Streamlit App**
+Once the model has been saved, run the app training script:
+```bash
+streamlit run app.py
 ```
 
 ---
