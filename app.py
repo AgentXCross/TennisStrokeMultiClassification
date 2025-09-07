@@ -86,9 +86,7 @@ class will be displayed in a bar chart. Made by Michael Liu.
 </p>
 """, unsafe_allow_html = True)
 
-sample_dir = "dataset/train_set/forehand"
-sample_image = random.choice(os.listdir(sample_dir))
-image_path = os.path.join(sample_dir, sample_image)
+image_path = os.path.join("assets", "example.jpeg")
 example_image = Image.open(image_path).convert("RGB")
 
 st.markdown("<h4 class = 'centered'>Input Image Example</h4>", unsafe_allow_html = True)
@@ -120,8 +118,8 @@ if uploaded_file is not None:
         alt.Chart(df)
         .mark_bar(size = 80) 
         .encode(
-            x=alt.X("Class", sort = None, title = None), 
-            y=alt.Y("Probability", scale = alt.Scale(domain = [0, 1]), title = "Probabilities of Each Class"),
+            x = alt.X("Class", sort = None, title = None), 
+            y = alt.Y("Probability", scale = alt.Scale(domain = [0, 1]), title = "Probabilities of Each Class"),
             color = alt.value("#FF69B4") 
         )
         .properties(
