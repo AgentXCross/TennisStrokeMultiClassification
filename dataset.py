@@ -23,7 +23,7 @@ def get_dataloaders(batch_size = 32):
     ])
 
     train_data = datasets.ImageFolder(root = "dataset/train_set", transform = train_transform)
-    test_data = datasets.ImageFolder(root = "data/test_set", transform = test_transform)
+    test_data = datasets.ImageFolder(root = "dataset/test_set", transform = test_transform)
 
     train_loader = DataLoader(train_data, batch_size = batch_size, shuffle = True, drop_last = True)
     test_loader = DataLoader(test_data, batch_size = batch_size, shuffle = False, drop_last = True)
