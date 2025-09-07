@@ -1,8 +1,9 @@
 torch
 torchmetrics
 torchvision
+torchsummary
+torchinfo
 scikit-learn
 numpy
 matplotlib
 Pillow
-opencv-python
