@@ -137,7 +137,7 @@ python main.py
 ### **What happens during training**
 - Model is initialized and moved to `mps` or `cpu` automatically (`cuda` should be supported). To move the model to `cuda`, when setting up device agnostic code:
 ```python
-device = 'cude' if torch.cuda.is_available() else 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 ```
 - Training runs for **50 epochs**.
 - `StepLR` scheduler halves the learning rate every 7 epochs.
