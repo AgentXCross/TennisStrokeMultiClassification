@@ -15,16 +15,11 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 CLASS_NAMES = ['Backhand', 'Forehand', 'Ready Position', 'Serve']
 
 #Image Transformation
-transform = transforms.Compose(
-    [#Make sure every side length is at least 720 first
-    transforms.Resize(720),
-    #Crop the center square
-    transforms.CenterCrop(720),
-    #Resize
-    transforms.Resize(size = (128, 128)),
-    #Turn the image into a torch tensor
-    transforms.ToTensor()]
-)
+transform = transforms.Compose([
+    transforms.Resize(256),          
+    transforms.CenterCrop(224),     
+    transforms.ToTensor()           
+])
 
 # Cached model loader
 @st.cache_resource

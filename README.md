@@ -53,7 +53,7 @@ The dataset used comes entirely from **Mendeley Data**:
 
 ### **Structure After Processing**
 Images were split into `train` and `test` sets at a **75/25 ratio**.
-This is done using file data_splitting.py which uses **scikit-learn** `train_test_split`:
+This is done using file data_splitting.py which uses **scikit-learn** `train_test_split()`:
 
 ```
 dataset/
@@ -83,7 +83,7 @@ project_root/
 ├── dataset.py            # Dataloader and data transformation functions
 ├── train_test_loop.py    # Training and evaluation loops
 ├── extra_functions.py    # Accuracy function
-├── data_splitting.py     # Used to create the structure after processing
+├── data_splitting.py     # Used to create the proper file structure after processing
 │
 ├── tennis_stroke_model.pth  # (Generated after training, saved model weights)
 │
@@ -98,8 +98,7 @@ The CNN is composed of:
 
 | Layer Group      | Details |
 |------------------|---------|
-| **Feature Extractor** | 5 convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool |
-| **Adaptive Pooling**  | AdaptiveAvgPool2d output forces to **8x8** spatial size |
+| **Feature Extractor** | 5 convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
 | **Classifier**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
 
 ---

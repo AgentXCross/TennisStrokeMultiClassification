@@ -1,5 +1,7 @@
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
+from PIL import Image
+import torch
 
 def get_dataloaders(batch_size = 32):
     """
@@ -8,18 +10,31 @@ def get_dataloaders(batch_size = 32):
     images should be in a corresponding class folder. Function applies transformations and
     creates DataLoaders where last is dropped.
     """
+
+    torch.manual_seed(11)
+
+    def center_crop_square(img: Image.Image) -> Image.Image:
+        """Crops the center square from a PIL image."""
+        width, height = img.size
+        min_dim = min(width, height)
+        left = (width - min_dim) // 2
+        top = (height - min_dim) // 2
+        right = left + min_dim
+        bottom = top + min_dim
+        return img.crop((left, top, right, bottom))
+
     train_transform = transforms.Compose([
-        transforms.Resize(720),
-        transforms.RandomCrop(720),
-        transforms.Resize((128, 128)),
-        transforms.ToTensor()
+        transforms.Lambda(center_crop_square),
+        transforms.Resize((320, 320)),
+        transforms.RandomHorizontalFlip(p = 0.5),
+        transforms.RandomRotation(degrees = 15),
+        transforms.ToTensor(),
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(720),
-        transforms.CenterCrop(720),
-        transforms.Resize((128, 128)),
-        transforms.ToTensor()
+        transforms.Lambda(center_crop_square),     
+        transforms.Resize((320, 320)),            
+        transforms.ToTensor(),
     ])
 
     train_data = datasets.ImageFolder(root = "dataset/train_set", transform = train_transform)
