@@ -11,7 +11,7 @@ def train_test_loop(
         train_dataloader: torch.utils.data.DataLoader,
         test_dataloader: torch.utils.data.DataLoader,
         accuracy_fn,
-        seed: int = 73
+        seed: int = 11
 
 ):
     """
@@ -53,6 +53,7 @@ def train_step(
     One train step. Takes a dataloader. Performs a forward pass, calculates loss/accuracy, and backpropagates.
     Dataloader must drop last.
     """
+    torch.manual_seed(11)
     train_loss_total, train_acc_total = 0, 0
     for X_batch, y_batch in dataloader:
         # Move to best device
@@ -85,6 +86,7 @@ def test_step(
     One test step. Takes a dataloader. Performs a forward pass, calculates loss and accuracy.
     Dataloader must drop last.
     """
+    torch.manual_seed(11)
     test_loss_total, test_accuracy_total = 0, 0
     for X_batch, y_batch in dataloader:
         X_batch, y_batch = X_batch.to(device), y_batch.to(device)

@@ -11,13 +11,13 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 
 #Initialize Model, Optimizer, Scheduler, Loss Function
 model = TennisStrokeClassifier().to(device)
-#Adjust the sgd_optimizer tomorrow
+
 sgd_optimizer = torch.optim.SGD(params = model.parameters(), lr = 0.01, momentum = 0.9, weight_decay = 1e-4)
 
 sgd_scheduler = StepLR(
     sgd_optimizer,  
-    step_size = 7,  
-    gamma = 0.9    
+    step_size = 9,  
+    gamma = 0.75   
 )
 
 loss_fn = nn.CrossEntropyLoss()
@@ -25,7 +25,7 @@ loss_fn = nn.CrossEntropyLoss()
 #Load the Datasets
 train_loader, test_loader = get_dataloaders(batch_size = 32)
 
-#Train and testing
+#Train and Testing
 train_test_loop(
     model = model,
     epochs = 51,
@@ -40,6 +40,6 @@ train_test_loop(
 )
 
 # Save the trained model
-model_path = "tennis_stroke_model.pth"
+model_path = "tennis_stroke_model_1.pth"
 torch.save(model.state_dict(), model_path)
 print(f"Model saved successfully at {model_path}.")

@@ -10,7 +10,6 @@ def get_dataloaders(batch_size = 32):
     images should be in a corresponding class folder. Function applies transformations and
     creates DataLoaders where last is dropped.
     """
-
     torch.manual_seed(11)
 
     def center_crop_square(img: Image.Image) -> Image.Image:
@@ -40,7 +39,7 @@ def get_dataloaders(batch_size = 32):
     train_data = datasets.ImageFolder(root = "dataset/train_set", transform = train_transform)
     test_data = datasets.ImageFolder(root = "dataset/test_set", transform = test_transform)
 
-    train_loader = DataLoader(train_data, batch_size = batch_size, shuffle = True, drop_last = True)
-    test_loader = DataLoader(test_data, batch_size = batch_size, shuffle = False, drop_last = True)
+    train_loader = DataLoader(train_data, batch_size = batch_size, shuffle = True, drop_last = True, num_workers = 10)
+    test_loader = DataLoader(test_data, batch_size = batch_size, shuffle = False, drop_last = True, num_workers = 10)
 
     return train_loader, test_loader
