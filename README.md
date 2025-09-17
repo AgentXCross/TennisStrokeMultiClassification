@@ -1,5 +1,5 @@
 # **Tennis Stroke Multi-Class Classification (Convolutional Neural Networks w/ PyTorch)**
-A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a custom convolutional neural network (CNN).  
+A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a pretrained convolutional neural network (CNN). Was previously created with a custom CNN but was not good at generalization 
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts for production.
 Once model was trained and saved using **PyTorch**, model was deployed using **Streamlit**.
 
@@ -23,9 +23,10 @@ Once model was trained and saved using **PyTorch**, model was deployed using **S
 The goal of this project is to develop a Convolutional Neural Network that can accurately classify tennis strokes from images. Images are taken from behind the player.
 
 ### **Key Features**
-- Custom CNN architecture with **Conv2d**, **BatchNorm**, **Dropout**, and **AdaptiveAvgPool2d** layers.
+- Originial model features Custom CNN architecture with **Conv2d**, **BatchNorm**, **Dropout**, and **AdaptiveAvgPool2d** layers.
+- Final model uses a pretrained EfficientNetB0 model
 - Training pipeline with:
-  - Adam optimizer + weight decay
+  - SDG optimizer + momentum + weight decay
   - Learning rate scheduler (`StepLR`)
   - Cross-entropy loss (`torch.nn.CrossEntropyLoss`)
 - Data pipeline using `torchvision.datasets.ImageFolder`.
@@ -34,7 +35,7 @@ The goal of this project is to develop a Convolutional Neural Network that can a
   - Model architecture
   - Training and testing loops
   - Utility functions
-- Supports **Apple MPS GPU acceleration** for Mac users. Nvidia GPU acceleration should also work.
+- Supports **Apple MPS GPU acceleration** for Mac users. Nvidia GPU acceleration should also work by replacing `mps` with `cuda`.
 - Started with Jupyter Notebook exploration before moving to Python scripts.
 
 ---
@@ -79,13 +80,15 @@ project_root/
 │
 ├── main.py               # Entry point for training and saving the model
 ├── app.py                # Model deployment using Streamlit
-├── model.py              # CNN model definition
+├── old_model.py          # Old CNN model definition
+├── new_model.py          # EfficientNet Model
 ├── dataset.py            # Dataloader and data transformation functions
 ├── train_test_loop.py    # Training and evaluation loops
 ├── extra_functions.py    # Accuracy function
 ├── data_splitting.py     # Used to create the proper file structure after processing
 │
-├── tennis_stroke_model.pth  # (Generated after training, saved model weights)
+├── tennis_stroke_model.pth  # Original Model Weights
+├── tennis_stroke_model.pth  # EfficientNet Model Weights
 │
 ├── requirements.txt      # Library/Framework requirements for running Notebook and Scripts
 └── README.md             # Project documentation
@@ -94,11 +97,11 @@ project_root/
 ---
 
 ## **Model Architecture**
-The CNN is composed of:
+The Original CNN is composed of:
 
 | Layer Group      | Details |
 |------------------|---------|
-| **Feature Extractor** | 5 convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
+| **Feature Extractor** | Convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
 | **Classifier**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
 
 ---
@@ -138,9 +141,6 @@ python main.py
 ```python
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 ```
-- Training runs for **50 epochs**.
-- `StepLR` scheduler halves the learning rate every 7 epochs.
-- Final model weights and biases are saved to `tennis_stroke_model.pth`.
 
 ---
 
@@ -186,7 +186,7 @@ Once the model was tuned, training was moved to Python scripts.
 
 ---
 
-## **Results**
+## **Original Custom Model Results**
 
 | Metric       | Value (Final Epoch) |
 |--------------|---------------------|
@@ -201,9 +201,20 @@ Once the model was tuned, training was moved to Python scripts.
 
 ---
 
+## **New EfficientNet Model Results**
+
+| Metric       | Value (Final Epoch) |
+|--------------|---------------------|
+| Train Accuracy | **99.93%** |
+| Test Accuracy  | **88.13%** |
+| Test Loss      | **0.38** |
+
+- Even though the results do not look as good as the original model, this model generalizes on new images much better
+
+---
+
 ## **Future Improvements**
 - Add early stopping to avoid unnecessary training or overfitting.
-- Experiment with pretrained models like ResNet or EfficientNet.
 - Instead of using images, extract images frame-by-frame from videos.
 - Get larger dataset with a larger variety of angles.
 
