@@ -6,7 +6,7 @@ from PIL import Image
 import pandas as pd
 import os
 import random
-from model import TennisStrokeClassification
+from torchvision import models
 
 #Device setup
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
@@ -15,17 +15,35 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 CLASS_NAMES = ['Backhand', 'Forehand', 'Ready Position', 'Serve']
 
 #Image Transformation
+def center_crop_square(img: Image.Image) -> Image.Image:
+    """Crops the center square from a PIL image."""
+    width, height = img.size
+    min_dim = min(width, height)
+    left = (width - min_dim) // 2
+    top = (height - min_dim) // 2
+    right = left + min_dim
+    bottom = top + min_dim
+    return img.crop((left, top, right, bottom))
+
 transform = transforms.Compose([
-    transforms.Resize(256),          
-    transforms.CenterCrop(224),     
-    transforms.ToTensor()           
-])
+    transforms.Lambda(center_crop_square),
+    transforms.Resize((320, 320)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],
+                         [0.229, 0.224, 0.225])
+    ])
 
 # Cached model loader
 @st.cache_resource
 def load_model():
-    model = TennisStrokeClassification(num_classes = 4)
-    model.load_state_dict(torch.load("tennis_stroke_model.pth", map_location = "cpu"))
+    # Load pretrained EfficientNet
+    model = models.efficientnet_b0(weights = models.EfficientNet_B0_Weights.DEFAULT)
+    
+    # Modify the classifier output number of classes
+    model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, 4)
+
+    # Load my weights
+    model.load_state_dict(torch.load("tennis_stroke_model_efficientnet.pth", map_location = "cpu"))
     model.eval()
     model.to(device)
     return model
