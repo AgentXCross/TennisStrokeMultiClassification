@@ -10,7 +10,7 @@ def get_dataloaders(batch_size = 32):
     images should be in a corresponding class folder. Function applies transformations and
     creates DataLoaders where last is dropped.
     """
-    torch.manual_seed(11)
+    torch.manual_seed(77)
 
     def center_crop_square(img: Image.Image) -> Image.Image:
         """Crops the center square from a PIL image."""
@@ -26,14 +26,21 @@ def get_dataloaders(batch_size = 32):
         transforms.Lambda(center_crop_square),
         transforms.Resize((320, 320)),
         transforms.RandomHorizontalFlip(p = 0.5),
-        transforms.RandomRotation(degrees = 15),
+        transforms.RandomGrayscale(p = 0.1),
+        transforms.RandomPerspective(distortion_scale = 0.2, p = 0.5),
+        transforms.RandomRotation(degrees = 20),
+        transforms.ColorJitter(brightness = 0.3, contrast = 0.3, saturation = 0.3),
         transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406],
+                            [0.229, 0.224, 0.225])
     ])
 
     test_transform = transforms.Compose([
-        transforms.Lambda(center_crop_square),     
-        transforms.Resize((320, 320)),            
+        transforms.Lambda(center_crop_square),
+        transforms.Resize((320, 320)),
         transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406],
+                            [0.229, 0.224, 0.225])
     ])
 
     train_data = datasets.ImageFolder(root = "dataset/train_set", transform = train_transform)
