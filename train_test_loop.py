@@ -1,95 +1,104 @@
 import torch
-def train_step(
+from typing import Callable
+from helper_functions import accuracy_fn
+def training_testing_loop(
         model: torch.nn.Module,
-        dataloader: torch.utils.data.DataLoader,
-        seed: int,
-        loss_function: torch.nn.Module,
-        optimization_function: torch.optim.Optimizer,
-        device: str,
-        accuracy_function,
-):
-    torch.manual_seed(seed)
-    train_loss_total, train_acc_total = 0, 0
-    for X_batch, y_batch in dataloader:
-        # Move to best device
-        X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-        model.train()
-        # Forward pass
-        y_train_preds_logits = model(X_batch)
-        # Loss
-        loss = loss_function(y_train_preds_logits, y_batch)
-        train_loss_total += loss.item()
-        # Backpropagation
-        optimization_function.zero_grad()
-        loss.backward()
-        # Gradient Descent
-        optimization_function.step()
-        # Accuracy
-        accuracy = accuracy_function(y_train_preds_logits.argmax(dim = 1), y_batch)
-        train_acc_total += accuracy
-    train_acc = train_acc_total / len(dataloader)
-    train_loss = train_loss_total / len(dataloader)
-    print(f"Train Loss: {train_loss} | Train Accuracy: {train_acc}")
-
-def test_step(
-        model: torch.nn.Module,
-        loss_function: torch.nn.Module,
-        seed: int,
-        accuracy_function,
-        dataloader: torch.utils.data.DataLoader,
-        device: str,
-):
-    torch.manual_seed(seed)
-    test_loss_total, test_accuracy_total = 0, 0
-    # Set to evaluation mode
-    model.eval()
-    with torch.inference_mode():
-        for X_batch, y_batch in dataloader:
-            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-            # Forward pass
-            y_test_preds_logits = model(X_batch)
-            # Loss
-            loss = loss_function(y_test_preds_logits, y_batch)
-            test_loss_total += loss.item()
-            # Accuracy
-            accuracy = accuracy_function(y_test_preds_logits.argmax(dim = 1), y_batch)
-            test_accuracy_total += accuracy
-        test_acc = test_accuracy_total / len(dataloader)
-        test_loss = test_loss_total / len(dataloader)
-        print(f"Test Loss: {test_loss} | Test Accuracy: {test_acc}")
-
-def train_test_loop(
-        model: torch.nn.Module,
-        epochs: int,
-        device: str,
-        seed: int,
-        optimizer: torch.optim.Optimizer,
-        scheduling_function: torch.optim.lr_scheduler,
-        loss_function: torch.nn.Module,
         train_dataloader: torch.utils.data.DataLoader,
         test_dataloader: torch.utils.data.DataLoader,
-        accuracy_fn
-):
-    model = model.to(device)
+        device: str,
+        max_epochs: int,
+        optimizer: torch.optim.Optimizer,
+        loss_function: torch.nn.Module,
+        accuracy_function: Callable[[torch.Tensor, torch.Tensor], float] = accuracy_fn,
+        seed: int = 73,
+) -> dict:
+    """
+    Training and Testing Loop
+
+    Args:
+        model: PyTorch model
+        train_dataloader: Dataloader containing training set
+        test_dataloader: Dataloader containing testation set
+        device: cuda or cpu or mps
+        max_epochs: number of epochs
+        optimizer: Optimization Functions
+        accuracy_function: Calculates accuracy
+        optimzer: Optimization function
+        seed: for reproducibility
+    """
+    # Set seed
     torch.manual_seed(seed)
-    for epoch in range(epochs):
-        print(f"Epoch: {epoch} ==============================")
-        train_step(
-            model = model,
-            dataloader = train_dataloader,
-            seed = 77,
-            loss_function = loss_function,
-            optimization_function = optimizer,
-            accuracy_function = accuracy_fn,
-            device = device
-        )
-        test_step(
-            model = model,
-            loss_function = loss_function,
-            seed = 77,
-            accuracy_function = accuracy_fn,
-            dataloader = test_dataloader,
-            device = device
-        )
-        if scheduling_function is not None:
-          scheduling_function.step()
+
+    # 4 Lists to keep track of train/test accuracy/loss.
+    train_loss, test_loss, train_accuracy, test_accuracy = [], [], [], []
+
+    # Move model to proper device
+    model.to(device)
+
+    for epoch in range(max_epochs):
+        # ------------------------ Training ------------------------------
+        model.train()
+
+        # Keep track of total loss and accuracy and divide by batch size at the end of every epoch
+        total_train_loss, total_train_accuracy = 0, 0
+
+        for X_batch_images, y_batch_labels in train_dataloader:
+            X_batch_images = X_batch_images.to(device)
+            
+            y_batch_labels = y_batch_labels.long().to(device)
+
+            optimizer.zero_grad()
+            y_train_pred_logits = model(X_batch_images)
+            loss = loss_function(y_train_pred_logits, y_batch_labels)
+            loss.backward()
+            optimizer.step()
+
+            total_train_loss += loss.item()
+            total_train_accuracy += accuracy_function(y_batch_labels.squeeze(), y_train_pred_logits)
+
+        # Calculate train loss and accuracy over the epoch
+        avg_train_loss = total_train_loss / len(train_dataloader)
+        avg_train_acc = total_train_accuracy / len(train_dataloader)
+
+        # ----------------------- Testing ---------------------------
+        # Set model to evaluation mode for testing
+        model.eval()
+        total_test_loss, total_test_accuracy = 0, 0
+        test_preds, test_targets = [], []
+
+        with torch.inference_mode():
+            for X_batch_images, y_batch_labels in test_dataloader:
+                X_batch_images = X_batch_images.to(device)
+
+                y_batch_labels = y_batch_labels.long().to(device)
+
+                y_test_pred_logits = model(X_batch_images)
+                loss = loss_function(y_test_pred_logits, y_batch_labels)
+                total_test_loss += loss.item()
+                total_test_accuracy += accuracy_function(y_batch_labels.squeeze(), y_test_pred_logits)
+
+                preds = torch.argmax(y_test_pred_logits, dim = 1)
+                test_preds.extend(preds.cpu().tolist())
+                test_targets.extend(y_batch_labels.cpu().tolist())
+
+            avg_test_loss = total_test_loss / len(test_dataloader)
+            avg_test_acc = total_test_accuracy / len(test_dataloader)
+
+        print(f"========== Epoch [{epoch + 1}/{max_epochs}] ============")
+        print(f"Train Loss: {avg_train_loss:.4f} | Test Loss: {avg_test_loss:.4f}")
+        print(f"Train Acc:  {avg_train_acc:.4f}% | Test Acc:  {avg_test_acc:.4f}%\n")
+
+        # Append losses and accuracies
+        train_loss.append(avg_train_loss)
+        test_loss.append(avg_test_loss)
+        train_accuracy.append(avg_train_acc)
+        test_accuracy.append(avg_test_acc)
+
+    return {
+        "train_loss": train_loss,
+        "test_loss": test_loss,
+        "train_accuracy": train_accuracy,
+        "test_accuracy": test_accuracy,
+        "test_preds": test_preds,
+        "test_targets": test_targets
+    }
