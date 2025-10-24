@@ -5,9 +5,9 @@ import torchvision.transforms as transforms
 from PIL import Image
 import pandas as pd
 import os
-import random
 from model_definition import create_convnext_tiny, create_mobilenet_v3, create_resnet18
 from transforms import transforms
+import numpy as np
 
 #Device setup
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
@@ -48,7 +48,9 @@ def load_models():
 model1, model2, model3 = load_models()
 
 def predict_image(image: Image.Image):
-    image_tensor = transform(image).unsqueeze(0).to(device)
+    image = np.array(image)
+    augmented = transform(image = image)
+    image_tensor = augmented["image"].unsqueeze(0).to(device)
 
     with torch.inference_mode():
         logits1 = model1(image_tensor)
