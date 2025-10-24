@@ -6,9 +6,15 @@ import os
 import random
 mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
-def accuracy_fn(pred, true):
-    correct = torch.eq(pred, true).sum().item()
-    return correct / len(pred) * 100
+def accuracy_function(y_true: torch.Tensor, y_pred_logits: torch.Tensor) -> float:
+    """
+    Computes accuracy for multiclass tasks.
+    Args:
+        y_true: Ground truth labels
+        y_pred_logits: Model logit outputs
+    """
+    preds = torch.argmax(y_pred_logits, dim = 1)  # shape (N,)
+    return (preds == y_true).float().mean().item() * 100
 
 label_map = {
     'backhand': 0,
