@@ -6,7 +6,8 @@ from PIL import Image
 import pandas as pd
 import os
 import random
-from torchvision import models
+from model_definition import create_convnext_tiny, create_mobilenet_v3, create_resnet18
+from transforms import transforms
 
 #Device setup
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
@@ -14,48 +15,55 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 #Class names
 CLASS_NAMES = ['Backhand', 'Forehand', 'Ready Position', 'Serve']
 
-#Image Transformation
-def center_crop_square(img: Image.Image) -> Image.Image:
-    """Crops the center square from a PIL image."""
-    width, height = img.size
-    min_dim = min(width, height)
-    left = (width - min_dim) // 2
-    top = (height - min_dim) // 2
-    right = left + min_dim
-    bottom = top + min_dim
-    return img.crop((left, top, right, bottom))
+# Model Weights Paths
+model1_weights = 'results-models/mobilenet_v3.pth'
+model2_weights = 'results-models/resnet18.pth'
+model3_weights = 'results-models/convnext.pth'
 
-transform = transforms.Compose([
-    transforms.Lambda(center_crop_square),
-    transforms.Resize((320, 320)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406],
-                         [0.229, 0.224, 0.225])
-    ])
+#Image Transformation
+nothing, transform = transforms()
 
 # Cached model loader
 @st.cache_resource
-def load_model():
-    # Load pretrained EfficientNet
-    model = models.efficientnet_b0(weights = models.EfficientNet_B0_Weights.DEFAULT)
-    
-    # Modify the classifier output number of classes
-    model.classifier[1] = torch.nn.Linear(model.classifier[1].in_features, 4)
+def load_models():
+    # Create Models
+    model1 = create_mobilenet_v3(num_classes = len(CLASS_NAMES))
+    model2 = create_resnet18(num_classes = len(CLASS_NAMES))
+    model3 = create_convnext_tiny(num_classes = len(CLASS_NAMES))
 
     # Load my weights
-    model.load_state_dict(torch.load("tennis_stroke_model_efficientnet.pth", map_location = "cpu"))
-    model.eval()
-    model.to(device)
-    return model
+    model1.load_state_dict(torch.load(model1_weights, map_location = device))
+    model1.eval()
+    model1.to(device)
 
-model = load_model()
+    model2.load_state_dict(torch.load(model2_weights, map_location = device))
+    model2.eval()
+    model2.to(device)
+
+    model3.load_state_dict(torch.load(model3_weights, map_location = device))
+    model3.eval()
+    model3.to(device)
+    return model1, model2, model3
+
+model1, model2, model3 = load_models()
 
 def predict_image(image: Image.Image):
     image_tensor = transform(image).unsqueeze(0).to(device)
+
     with torch.inference_mode():
-        outputs = model(image_tensor)
-        probs = torch.softmax(outputs, dim = 1).squeeze().cpu().numpy()
-    return probs
+        logits1 = model1(image_tensor)
+        logits2 = model2(image_tensor)
+        logits3 = model3(image_tensor)
+
+        probs1 = torch.softmax(logits1, dim = 1)
+        probs2 = torch.softmax(logits2, dim = 1)
+        probs3 = torch.softmax(logits3, dim = 1)
+
+        # Average ensemble
+        avg_probs = (probs1 + probs2 + probs3) / 3
+        avg_probs = avg_probs.squeeze().cpu().numpy()
+
+    return avg_probs
 
 st.set_page_config(
     page_title = "Tennis Stroke Classifier",
@@ -132,8 +140,8 @@ if uploaded_file is not None:
         .mark_bar(size = 80) 
         .encode(
             x = alt.X("Class", sort = None, title = None), 
-            y = alt.Y("Probability", scale = alt.Scale(domain = [0, 1]), title = "Probabilities of Each Class"),
-            color = alt.value("#FF69B4") 
+            y = alt.Y("Probability", scale = alt.Scale(domain = [0, 1]), title = "Probability of Each Class"),
+            color = alt.value("#FF0873") 
         )
         .properties(
             width = 600, 
