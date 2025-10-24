@@ -1,15 +1,17 @@
 import torch
 from typing import Callable
-from helper_functions import accuracy_fn
+from helper_functions import accuracy_function, save_model_weights
+
 def training_testing_loop(
         model: torch.nn.Module,
+        model_name: str,
         train_dataloader: torch.utils.data.DataLoader,
         test_dataloader: torch.utils.data.DataLoader,
         device: str,
         max_epochs: int,
         optimizer: torch.optim.Optimizer,
         loss_function: torch.nn.Module,
-        accuracy_function: Callable[[torch.Tensor, torch.Tensor], float] = accuracy_fn,
+        accuracy_function: Callable[[torch.Tensor, torch.Tensor], float] = accuracy_function,
         seed: int = 73,
 ) -> dict:
     """
@@ -17,6 +19,7 @@ def training_testing_loop(
 
     Args:
         model: PyTorch model
+        model_name: Name of the model (for saving weights)
         train_dataloader: Dataloader containing training set
         test_dataloader: Dataloader containing testation set
         device: cuda or cpu or mps
@@ -24,7 +27,7 @@ def training_testing_loop(
         optimizer: Optimization Functions
         accuracy_function: Calculates accuracy
         optimzer: Optimization function
-        seed: for reproducibility
+        seed: For reproducibility
     """
     # Set seed
     torch.manual_seed(seed)
@@ -34,6 +37,9 @@ def training_testing_loop(
 
     # Move model to proper device
     model.to(device)
+
+    # Keep track of the best test loss
+    best_test_loss = float("inf")
 
     for epoch in range(max_epochs):
         # ------------------------ Training ------------------------------
@@ -87,6 +93,11 @@ def training_testing_loop(
         print(f"========== Epoch [{epoch + 1}/{max_epochs}] ============")
         print(f"Train Loss: {avg_train_loss:.4f} | Test Loss: {avg_test_loss:.4f}")
         print(f"Train Acc:  {avg_train_acc:.4f}% | Test Acc:  {avg_test_acc:.4f}%\n")
+
+        if avg_test_loss < best_test_loss:
+            best_test_loss = avg_test_loss
+            save_model_weights(model, filename = f"{model_name}.pth")
+            print(f"✅ Best model saved at epoch {epoch+1} with test loss {avg_test_loss:.4f}")
 
         # Append losses and accuracies
         train_loss.append(avg_train_loss)

@@ -4,7 +4,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
+from torch import nn
+
 mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+
+def save_model_weights(model: nn.Module, filename: str, save_dir: str = 'results-models') -> None:
+    """
+    Saves a PyTorch model's weights (state_dict) to a specified directory.
+
+    Args:
+        model (nn.Module): Trained PyTorch model
+        save_dir (str): Directory to save model weights into (default: results-models)
+        filename (str): Filename for the weights
+    """
+    os.makedirs(save_dir, exist_ok = True)
+
+    filepath = os.path.join(save_dir, filename)
+
+    torch.save(model.state_dict(), filepath)
 
 def accuracy_function(y_true: torch.Tensor, y_pred_logits: torch.Tensor) -> float:
     """

@@ -9,7 +9,7 @@ class FocalLoss(nn.Module):
     Multiclass Focal Loss implementation.
     Works with softmax logits (for CrossEntropy-style classification).
     """
-    def __init__(self, alpha: List[int], gamma: float = 2.0):
+    def __init__(self, alpha: List[float], gamma: float = 2.0):
         """
         Args:
             alpha: List of weighting factor for class imbalance
@@ -38,8 +38,21 @@ class FocalLoss(nn.Module):
 
         return loss.mean()
     
-def create_model(device: str):
-    """Initialize the model with the correct number of final outputs."""
-    tennis_stroke_model = models.mobilenet_v3_small(weights = "IMAGENET1K_V1").to(device)
-    in_features = tennis_stroke_model.classifier[3].in_features
-    tennis_stroke_model.classifier[3] = nn.Linear(in_features, 4)
+# Functions to create mobels with pretrained weights
+def create_mobilenet_v3(num_classes: int, weights = "IMAGENET1K_V1"):
+    model = models.mobilenet_v3_small(weights = weights)
+    in_features = model.classifier[3].in_features
+    model.classifier[3] = nn.Linear(in_features, num_classes)
+    return model
+
+def create_resnet18(num_classes: int, weights = "IMAGENET1K_V1"):
+    model = models.resnet18(weights = weights)
+    in_features = model.fc.in_features
+    model.fc = nn.Linear(in_features, num_classes)
+    return model
+
+def create_convnext_tiny(num_classes: int, weights = "IMAGENET1K_V1"):
+    model = models.convnext_tiny(weights = weights)
+    in_features = model.classifier[2].in_features
+    model.classifier[2] = nn.Linear(in_features, num_classes)
+    return model
