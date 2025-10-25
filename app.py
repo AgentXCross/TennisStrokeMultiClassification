@@ -7,7 +7,9 @@ import pandas as pd
 import os
 from model_definition import create_convnext_tiny, create_mobilenet_v3, create_resnet18
 from transforms import transforms
+from helper_functions import generate_all_gradcams
 import numpy as np
+import cv2
 
 #Device setup
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
@@ -127,8 +129,29 @@ if uploaded_file is not None:
     probs = predict_image(image)
     predicted_class = CLASS_NAMES[probs.argmax()]
 
+    # GradCAM implementaion
+    np_img = np.array(image)
+    np_img_resized = cv2.resize(np_img, (224, 224))
+    original_img = np_img_resized.astype(np.float32) / 255.0
+
+    augmented = transform(image = np_img)
+    image_tensor = augmented["image"].unsqueeze(0).to(device)
+
+    cam_mb, cam_res, cam_cx = generate_all_gradcams(
+        original_img,
+        image_tensor,
+        model1, model2, model3
+    )
+
     # Show results
     st.subheader(f"Prediction: **{predicted_class}**")
+
+    st.markdown("#### Grad-CAM Visualizations")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.image(np_img, caption = "Original", width = 'stretch')
+    col2.image(cam_mb, caption = "MobileNetV3-Small", width = 'stretch')
+    col3.image(cam_res, caption = "ResNet-18", width = 'stretch')
+    col4.image(cam_cx, caption = "ConvNeXt-Tiny", width = 'stretch')
 
     # Create a DataFrame for Altair
     df = pd.DataFrame({

@@ -1,5 +1,4 @@
-<h1><strong>Tennis Stroke Multi-Class Classification</strong></h1>
-
+# **Tennis Stroke Multi-Class Classification** 
 ![Intro Image](assets/serve_gradcam.png)
 A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a 3 pretrained convolutional neural network (CNN). The chosen architectures used were ResNet-18, MobileNetV3-Small, and ConvNeXt-Tiny. 
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts.
@@ -53,9 +52,9 @@ Entire dataset comes from **Mendeley Data**, containg 2000 total images.
 
 ### **Dataset Structure and Data Splitting**
 Images were split into `train` and `test` sets at a **75/25 ratio**.
-This is done by using **scikit-learn** `train_test_split()` on a pandas `pd.DataFrame` containing all the images.
+This is done by using **scikit-learn** `train_test_split()` on a pandas `pd.DataFrame` containing all the image paths and classes. A custom PyTorch dataset definition is written in `dataset.py` to get images and attach labels based on the details from the dataframe.
 
-Dataset is structure as follows:
+Images are structured as follows:
 
 ```
 image_data/

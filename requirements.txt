@@ -1,6 +1,6 @@
 streamlit
-torch
-torchvision
+torch==2.2.0
+torchvision==0.17.0
 torchmetrics
 albumentations
 pillow
@@ -9,4 +9,5 @@ matplotlib
 scikit-learn
 pandas
 pytorch-grad-cam
-opencv-python
+opencv-python-headless
+altair
