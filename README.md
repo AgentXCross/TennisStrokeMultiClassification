@@ -1,4 +1,4 @@
-# **Tennis Stroke Multi-Class Classification**
+<h1><strong>Tennis Stroke Multi-Class Classification</strong></h1>
 ![Intro Image](assets/serve_gradcam.png)
 A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a 3 pretrained convolutional neural network (CNN). The chosen architectures used were ResNet-18, MobileNetV3-Small, and ConvNeXt-Tiny. 
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts.
@@ -6,7 +6,7 @@ Once models were trained and saved using **PyTorch**, model was deployed using *
 
 ---
 
-## **Project Table of Contents**
+## **Table of Contents**
 1. [Overview](#overview)  
 2. [Dataset Source](#dataset-source)  
 3. [Project Structure](#project-structure)  
@@ -131,14 +131,11 @@ You may have to adjust the path/value of `INPUT_DIR` according to the name of th
 ## **Training the Model**
 Run the main training script:
 ```bash
-python main.py
+python3 main.py
 ```
 
-### **What happens during training**
-- Model is initialized and moved to `mps` or `cpu` automatically (`cuda` should be supported). To move the model to `cuda`, when setting up device agnostic code:
-```python
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-```
+### **What Happens During Training**
+- Model is initialized and moved to `mps` or `cpu` or `cuda`
 
 ---
 
