@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torchvision import models
-import torch.functional as F
+import torch.nn.functional as F
 from typing import List
 
 class FocalLoss(nn.Module):
