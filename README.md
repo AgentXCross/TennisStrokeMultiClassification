@@ -1,4 +1,5 @@
 # **Tennis Stroke Multi-Class Classification**
+[Intro Image](assets/serve_gradcam.png)
 A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a 3 pretrained convolutional neural network (CNN). The chosen architectures used were ResNet-18, MobileNetV3-Small, and ConvNeXt-Tiny. 
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts.
 Once models were trained and saved using **PyTorch**, model was deployed using **Streamlit**.
@@ -7,7 +8,7 @@ Once models were trained and saved using **PyTorch**, model was deployed using *
 
 ## **Project Table of Contents**
 1. [Overview](#overview)  
-2. [Dataset](#dataset)  
+2. [Dataset Source](#dataset-source)  
 3. [Project Structure](#project-structure)  
 4. [Model Architecture](#model-architecture)  
 5. [Setup Instructions](#setup-instructions)  
@@ -39,11 +40,9 @@ The goal of this project is to fine tune Convolutional Neural Networks that can 
 
 ---
 
-## **Dataset**
-The dataset used comes entirely from **Mendeley Data**:
-
-**Source:**  
-[Tennis Strokes Dataset on Mendeley Data](https://data.mendeley.com/datasets/nv3rpsxhhk/1)
+## **Dataset Source**
+Entire dataset comes from **Mendeley Data**, containg 2000 total images.
+[Tennis Player Actions Dataset for Human Pose Estimation](https://data.mendeley.com/datasets/nv3rpsxhhk/1)
 
 ### **Classes Included**
 1. Forehand  
@@ -97,8 +96,8 @@ project_root/
 ## **Model Architectures**
 The Overall Model is composed of 3 Models who have their logits/prediction probabilities averaged before making a decision:
 
-| Model            | Details        |
-|------------------|----------------|
+| Model                         | Details                  |
+|-------------------------------|--------------------------|
 | **MobileNetV3-Small** | Convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
 | **ResNet-18**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
 | **ConvNeXt-Tiny**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
@@ -109,7 +108,7 @@ The Overall Model is composed of 3 Models who have their logits/prediction proba
 
 ### **1. Clone the repository**
 ```bash
-git clone git clone https://github.com/AgentXCross/TennisStrokeMultiClassification.git
+git clone https://github.com/AgentXCross/TennisStrokeMultiClassification.git
 cd TennisStrokeMultiClassification
 ```
 
@@ -221,11 +220,9 @@ Once the model was tuned, training was moved to Python scripts.
 
 ## **Acknowledgements**
 Dataset provided by:
-- [Mendeley Data - Tennis Strokes Dataset](https://data.mendeley.com/datasets/nv3rpsxhhk/1)
+[Tennis Player Actions Dataset for Human Pose Estimation](https://data.mendeley.com/datasets/nv3rpsxhhk/1)
 
 Citation:
     Wang, Chun-Yi; Lai, Kalin Guanlun; Huang, Hsu-Chun; Lin, Wei-Ting (2024), “Tennis Player Actions Dataset for Human Pose Estimation”, Mendeley Data, V1, doi: 10.17632/nv3rpsxhhk.1
-
-This project was built as part of an exploration into **deep learning/computer vision for sports motion classification**.
 
 ---
