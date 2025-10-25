@@ -7,7 +7,8 @@ import pandas as pd
 import os
 from model_definition import create_convnext_tiny, create_mobilenet_v3, create_resnet18
 from transforms import transforms
-from helper_functions import generate_all_gradcams
+from gradcam_local import generate_all_gradcams
+from gradcam_local import GradCAM, show_cam_on_image
 import numpy as np
 import cv2
 
