@@ -10,7 +10,7 @@ device = 'mps' if torch.backends.mps.is_available() else 'cpu'
 
 # Import dataframes
 train_df = pd.read_csv('dataframe/train_df.csv')
-test_df = pd.read_csv('dataframe/test.csv')
+test_df = pd.read_csv('dataframe/test_df.csv')
 
 # Label mapping
 label_map = {
