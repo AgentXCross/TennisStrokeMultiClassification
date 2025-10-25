@@ -1,4 +1,5 @@
 <h1><strong>Tennis Stroke Multi-Class Classification</strong></h1>
+
 ![Intro Image](assets/serve_gradcam.png)
 A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a 3 pretrained convolutional neural network (CNN). The chosen architectures used were ResNet-18, MobileNetV3-Small, and ConvNeXt-Tiny. 
 This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts.
