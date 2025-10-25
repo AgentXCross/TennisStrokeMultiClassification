@@ -1,7 +1,7 @@
-# **Tennis Stroke Multi-Class Classification (Convolutional Neural Networks w/ PyTorch)**
-A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a pretrained convolutional neural network (CNN). Was previously created with a custom CNN but was not good at generalization 
-This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts for production.
-Once model was trained and saved using **PyTorch**, model was deployed using **Streamlit**.
+# **Tennis Stroke Multi-Class Classification**
+A deep learning project to classify tennis images into four categories — **forehand, backhand, serve, and ready position** — using a 3 pretrained convolutional neural network (CNN). The chosen architectures used were ResNet-18, MobileNetV3-Small, and ConvNeXt-Tiny. 
+This project was initially developed and evaluated in a **Jupyter Notebook**, then split into **Python** scripts.
+Once models were trained and saved using **PyTorch**, model was deployed using **Streamlit**.
 
 ---
 
@@ -20,22 +20,21 @@ Once model was trained and saved using **PyTorch**, model was deployed using **S
 ---
 
 ## **Overview**
-The goal of this project is to develop a Convolutional Neural Network that can accurately classify tennis strokes from images. Images are taken from behind the player.
+The goal of this project is to fine tune Convolutional Neural Networks that can accurately classify tennis strokes from images. Images are exclusively taken from behind the player.
 
 ### **Key Features**
-- Originial model features Custom CNN architecture with **Conv2d**, **BatchNorm**, **Dropout**, and **AdaptiveAvgPool2d** layers.
-- Final model uses a pretrained EfficientNetB0 model
-- Training pipeline with:
-  - SDG optimizer + momentum + weight decay
-  - Learning rate scheduler (`StepLR`)
-  - Cross-entropy loss (`torch.nn.CrossEntropyLoss`)
-- Data pipeline using `torchvision.datasets.ImageFolder`.
+- Final model uses pretrained MobileNetV3-Small, ResNet-18, and ConvNeXt-Tiny models by averaging logits (prediction probabilities)
+- Training Pipeline with:
+  - Adam Optimizer
+  - Focal Loss (Modified Cross-Entropy)
 - Python scripts with clean separation of:
-  - Dataset preprocessing and transformations
-  - Model architecture
-  - Training and testing loops
-  - Utility functions
-- Supports **Apple MPS GPU acceleration** for Mac users. Nvidia GPU acceleration should also work by replacing `mps` with `cuda`.
+  - Dataset Preprocessing/Pipeline
+  - Transformations
+  - Model Architecture and Loss Function Definitions
+  - Training and Testing Loop
+  - Utility Functions
+  - Streamlit App
+- Supports **Apple MPS GPU acceleration** for Mac users. Nvidia GPU acceleration should also work by replacing `mps` with `cuda`. Also, replace `device = 'mps' if torch.mps.backends.is_available() else 'cpu'` with `device = 'cuda' if torch.cuda.is_available() else 'cpu'`
 - Started with Jupyter Notebook exploration before moving to Python scripts.
 
 ---
@@ -49,27 +48,22 @@ The dataset used comes entirely from **Mendeley Data**:
 ### **Classes Included**
 1. Forehand  
 2. Backhand  
-3. Serve  
+3. Serve
 4. Ready Position
 
-### **Structure After Processing**
+### **Dataset Structure and Data Splitting**
 Images were split into `train` and `test` sets at a **75/25 ratio**.
-This is done using file data_splitting.py which uses **scikit-learn** `train_test_split()`:
+This is done by using **scikit-learn** `train_test_split()` on a pandas `pd.DataFrame` containing all the images.
+
+Dataset is structure as follows:
 
 ```
-dataset/
+image_data/
 │
-├── train_set/
-│   ├── forehand/
-│   ├── backhand/
-│   ├── serve/
-│   └── ready_position/
-│
-└── test_set/
-    ├── forehand/
-    ├── backhand/
-    ├── serve/
-    └── ready_position/
+├── backhand/
+├── forehand/
+├── ready_position/
+└── serve/
 ```
 
 ---
@@ -78,31 +72,36 @@ dataset/
 ```
 project_root/
 │
-├── main.py               # Entry point for training and saving the model
-├── app.py                # Model deployment using Streamlit
-├── old_model.py          # Old CNN model definition
-├── new_model.py          # EfficientNet Model
-├── dataset.py            # Dataloader and data transformation functions
-├── train_test_loop.py    # Training and evaluation loops
-├── extra_functions.py    # Accuracy function
-├── data_splitting.py     # Used to create the proper file structure after processing
+├── main.py                     # Entry point for training and saving the model
+├── app.py                      # Model deployment using Streamlit
+├── model_definition.py         # Contains pretrained model definitions and loss function definition
+├── dataset.py                  # Dataset Definition and DataLoader Creation
+├── transforms.py               # Albumentation Transformations for training and testing
+├── train_test_loop.py          # Training and evaluation loops
+├── helper_functions.py         # Accuracy function, Model saving function, etc.
 │
-├── tennis_stroke_model.pth  # Original Model Weights
-├── tennis_stroke_model.pth  # EfficientNet Model Weights
+├── dataframe/                  # Folder containing training and testing dataframes
+├── image_data/                 # Contains images
+├── results-models/             # Model result dictionaries and model weights
+├── assets/                     # Images for project results
 │
-├── requirements.txt      # Library/Framework requirements for running Notebook and Scripts
-└── README.md             # Project documentation
+├── model-development-2.ipynb   # Main project development notebook
+├── old_model_development.ipynb # Original model development notebook
+│
+├── requirements.txt            # Library/Framework requirements for running Notebook and Scripts
+└── README.md                   # Project documentation
 ```
 
 ---
 
-## **Model Architecture**
-The Original CNN is composed of:
+## **Model Architectures**
+The Overall Model is composed of 3 Models who have their logits/prediction probabilities averaged before making a decision:
 
-| Layer Group      | Details |
-|------------------|---------|
-| **Feature Extractor** | Convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
-| **Classifier**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
+| Model            | Details        |
+|------------------|----------------|
+| **MobileNetV3-Small** | Convolutional blocks with Conv2D → BatchNorm → ReLU Non-Linear Activation → MaxPool → Dropout |
+| **ResNet-18**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
+| **ConvNeXt-Tiny**   | Flatten → ReLU Non-Linear Activation → Output (logits) |
 
 ---
 
@@ -110,8 +109,8 @@ The Original CNN is composed of:
 
 ### **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/tennis-stroke-classification.git
-cd tennis-stroke-classification
+git clone git clone https://github.com/AgentXCross/TennisStrokeMultiClassification.git
+cd TennisStrokeMultiClassification
 ```
 
 ### **2. Install dependencies**
